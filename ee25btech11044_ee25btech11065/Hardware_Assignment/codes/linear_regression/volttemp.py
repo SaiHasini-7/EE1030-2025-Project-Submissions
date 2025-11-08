@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Your experimental data
-temperatures = np.array([64.1, 66.8, 70.3, 74.9, 78.6, 82.4, 86.9, 89.6])
-voltages = np.array([1.106, 1.119, 1.153, 1.153, 1.169, 1.185, 1.205, 1.217])
+temperatures = np.array([92.5,89.6, 88.9, 86.5, 85.5, 83.6, 81.4, 79.6])
+voltages = np.array([1.144, 1.139, 1.134, 1.129, 1.124, 1.119, 1.114, 1.109])
 
 # Reshape for matrix operations
 T = temperatures.reshape(-1, 1)

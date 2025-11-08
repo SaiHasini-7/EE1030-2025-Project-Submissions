@@ -1,0 +1,339 @@
+\let\negmedspace\undefined
+\let\negthickspace\undefined
+\documentclass[journal]{IEEEtran}
+\usepackage[a5paper, margin=10mm, onecolumn]{geometry}
+\usepackage{tfrupee} 
+
+\setlength{\headheight}{1cm}
+\setlength{\headsep}{0mm}     
+
+\usepackage{gvv-book}
+\usepackage{gvv}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{txfonts}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{gensymb}
+\usepackage{comment}
+\usepackage[breaklinks=true]{hyperref}
+\usepackage{tkz-euclide} 
+\usepackage{listings}
+\def\inputGnumericTable{}                                 
+\usepackage[latin1]{inputenc}                                
+\usepackage{color}                                            
+\usepackage{array}                                            
+\usepackage{longtable}                                       
+\usepackage{calc}                                             
+\usepackage{multirow}                                         
+\usepackage{hhline}                                           
+\usepackage{ifthen}                                           
+\usepackage{lscape}
+\usepackage{circuitikz}
+
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=4em, text centered, rounded corners, minimum height=3em]
+\tikzstyle{sum} = [draw, fill=blue!10, circle, minimum size=1cm, node distance=1.5cm]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+
+\begin{document}
+
+\bibliographystyle{IEEEtran}
+\vspace{3cm}
+
+\title{Software Assignment Report}
+\author{EE25BTECH11044 - Sai Hasini Pappula}
+\maketitle
+
+\renewcommand{\thefigure}{\thesection.\arabic{figure}}
+\renewcommand{\thetable}{\thesection.\arabic{table}}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+
+\setlength{\intextsep}{10pt} 
+
+\section{Summary of Singular Value Decomposition - Gilbert Strang}
+\subsection{The SVD Formula}
+
+Any matrix $A_{m \times n}$ can be decomposed as:
+\[
+A = U\Sigma V^{\top}
+\]
+where $U$ ($m \times m$) and $V$ ($n \times n$) are orthogonal matrices, and $\Sigma$ ($m \times n$) is diagonal with non-negative entries $\sigma_1 \geq \sigma_2 \geq \cdots \geq 0$ (singular values).
+
+\subsection{Computing the SVD}
+
+\subsubsection{Finding $V$ and $\Sigma$}
+\begin{enumerate}
+    \item Compute $A^{\top}A$ (an $n \times n$ matrix)
+    \item Find eigenvectors of $A^{\top}A$ $\rightarrow$ columns of $V$
+    \item Find eigenvalues $\lambda_i$ of $A^{\top}A$ 
+    \item Singular values: $\sigma_i = \sqrt{\lambda_i}$
+\end{enumerate}
+
+\subsubsection{Finding $U$}
+\begin{enumerate}
+    \item Compute $AA^{\top}$ (an $m \times m$ matrix)
+    \item Find eigenvectors of $AA^{\top}$ $\rightarrow$ columns of $U$
+    \item Note: Eigenvalues of $AA^{\top}$ equal eigenvalues of $A^{\top}A$
+\end{enumerate}
+
+\subsection{Geometric Meaning}
+
+The SVD establishes:
+\[
+Av_i = \sigma_i u_i
+\]
+where $v_i$ are orthonormal basis vectors in the row space, $u_i$ are orthonormal basis vectors in the column space, and $\sigma_i$ are stretching factors.
+
+\subsection{Key Properties}
+
+\begin{itemize}
+    \item Orthogonality: $U^{\top}U = I$ and $V^{\top}V = I$
+    \item Relationship: $Av_i = \sigma_i u_i$
+    \item SVD works for \emph{any} matrix (rectangular, singular, etc.)
+\end{itemize}
+
+\section{Algorithm Explanation}
+
+\subsection{Overview}
+
+The implemented method performs a \textbf{Truncated Singular Value Decomposition (SVD)} 
+using the \textbf{Power Iteration with Deflation} technique. 
+This approach efficiently extracts the top-$k$ singular values and corresponding singular vectors of a real or complex matrix 
+without computing a full SVD decomposition.
+
+\subsection{Step-by-Step Procedure}
+
+\begin{enumerate}
+    \item \textbf{Form the covariance (or Hermitian) matrix:}
+    \[
+    B = A^{T} A \quad \text{(real case)} \qquad \text{or} \qquad B = A^{H} A \quad \text{(complex case)}
+    \]
+    The eigenvectors of $B$ correspond to the right singular vectors of $A$, and the eigenvalues of $B$ are the squared singular values of $A$.
+
+    \item \textbf{Power iteration to find dominant eigenvector:} \\
+    Start from a random vector $v$, and iteratively compute
+    \[
+    v_{t+1} = \frac{Bv_t}{\|Bv_t\|}
+    \]
+    until convergence. The resulting vector $v$ approximates the dominant eigenvector of $B$.
+
+    \item \textbf{Compute the corresponding eigenvalue:}
+    \[
+    \lambda = v^{T} B v
+    \quad \text{and} \quad
+    \sigma = \sqrt{\lambda}
+    \]
+    where $\sigma$ is the singular value of $A$ associated with $v$.
+
+    \item \textbf{Compute the left singular vector:}
+    \[
+    u = \frac{A v}{\|A v\|}
+    \]
+    The pair $(u, v)$ represents one singular vector pair.
+
+    \item \textbf{Deflation:} \\
+    To find the next singular component, remove the contribution of the current one:
+    \[
+    B = B - \sigma^{2} v v^{T}
+    \]
+    (or $B = B - \sigma^{2} v v^{H}$ for the complex case).
+    This ensures the next power iteration targets the next dominant component.
+
+    \item \textbf{Repeat for $k$ components:}
+    Repeat steps 2 to 5 until $k$ dominant singular triplets $(u_i, \sigma_i, v_i)$ are found.
+
+    \item \textbf{Reconstruct the rank-$k$ approximation:}
+    \[
+    A_k = \sum_{i=1}^{k} \sigma_i u_i v_i^{T}
+    \]
+    (or $A_k = \sum_{i=1}^{k} \sigma_i u_i v_i^{H}$ in the complex case).
+\end{enumerate}
+
+\subsection{Mathematical Intuition}
+
+The Power Iteration method exploits a fundamental property of eigen decomposition:  
+when a vector is repeatedly multiplied by a matrix, the component in the direction 
+of the dominant eigenvector grows the fastest.
+
+\subsubsection*{Power Iteration Convergence}
+
+Let $B = A^{T}A$ (or $A^{H}A$ in the complex case), and let its eigen decomposition be
+\[
+B = V \Lambda V^{T}
+\]
+where $\Lambda = \text{diag}(\lambda_1, \lambda_2, \ldots, \lambda_n)$ with 
+$\lambda_1 > \lambda_2 > \cdots > \lambda_n$.  
+Starting from a random vector $v_0$, we repeatedly compute:
+\[
+v_{t+1} = \frac{B v_t}{\|B v_t\|}
+\]
+Expanding this recursively gives:
+\[
+v_t = \frac{B^t v_0}{\|B^t v_0\|} 
+= \frac{V \Lambda^t V^{T} v_0}{\|V \Lambda^t V^{T} v_0\|}
+\]
+As $t \to \infty$, all terms involving smaller eigenvalues $\lambda_2, \lambda_3, \ldots$ 
+decay relative to $\lambda_1^t$.  
+Hence, $v_t$ converges to the eigenvector corresponding to the largest eigenvalue $\lambda_1$.
+
+\subsubsection*{Deflation Principle}
+
+Once the top eigenvector $v_1$ and corresponding singular value $\sigma_1 = \sqrt{\lambda_1}$ 
+are found, their contribution is subtracted (deflated) from the covariance matrix:
+\[
+B = B - \sigma_1^2 v_1 v_1^{T}
+\]
+This removes the influence of the already extracted component, 
+allowing the next iteration to converge to the eigenvector associated with the second-largest eigenvalue, and so on.
+
+\subsubsection*{Relation to SVD}
+
+For the original matrix $A$, each eigenpair $(\lambda_i, v_i)$ of $B = A^{T}A$ gives a 
+right singular vector $v_i$ and corresponding left singular vector
+\[
+u_i = \frac{A v_i}{\|A v_i\|}
+\]
+with singular value $\sigma_i = \sqrt{\lambda_i}$.  
+Thus, the Power Iteration with Deflation sequentially reconstructs the most significant 
+singular triplets $(u_i, \sigma_i, v_i)$, forming a truncated approximation
+\[
+A_k = \sum_{i=1}^{k} \sigma_i u_i v_i^{T}
+\]
+that captures most of the energy of $A$ while reducing storage and computation.
+
+\subsection{Error Computation}
+
+The quality of the reconstruction is evaluated using the Frobenius norm error:
+\[
+\|A - A_k\|_F = \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{n} (A_{ij} - (A_k)_{ij})^2}
+\]
+A smaller error indicates a more accurate reconstruction.
+
+\subsection{Remarks}
+
+This algorithm provides an efficient approximation of the top-$k$ singular components:
+\begin{itemize}
+    \item Avoids full matrix decomposition ($\mathcal{O}(n^3)$)
+    \item Numerically stable and scalable
+    \item Extendable to complex matrices using Hermitian operations ($A^H$)
+    \item Ideal for image compression where few singular values capture most information
+\end{itemize}
+
+\subsection{Pseudocode for Truncated SVD using Power Iteration}
+
+\noindent\textbf{Input:} Matrix $A \in \mathbb{R}^{m \times n}$ (or $\mathbb{C}^{m \times n}$), rank $k$ \\
+\textbf{Output:} $U \in \mathbb{R}^{m \times k}$, $\Sigma \in \mathbb{R}^{k}$, $V \in \mathbb{R}^{n \times k}$
+
+\begin{flushleft}
+$B = A^{T} A$ \hfill (or $A^{H} A$ in the complex case) \\[3pt]
+\textbf{for} $i = 1$ \textbf{to} $k$ \textbf{do} \\[2pt]
+\hspace*{1.5em} Initialize random vector $v$ \\[2pt]
+\hspace*{1.5em} \textbf{repeat until convergence:} \\[2pt]
+\hspace*{3em} $w = Bv$ \\[2pt]
+\hspace*{3em} $v = \dfrac{w}{\|w\|}$ \\[2pt]
+\hspace*{1.5em} $\lambda = v^{T} B v$ \\[2pt]
+\hspace*{1.5em} $\sigma = \sqrt{\lambda}$ \\[2pt]
+\hspace*{1.5em} $\Sigma[i] = \sigma$ \\[2pt]
+\hspace*{1.5em} $u = A v$ \\[2pt]
+\hspace*{1.5em} $U[:, i] = \dfrac{u}{\|u\|}$ \\[2pt]
+\hspace*{1.5em} $V[:, i] = v$ \\[2pt]
+\hspace*{1.5em} $B = B - \sigma^{2} v v^{T}$ \hfill (or $B - \sigma^{2} v v^{H}$ for complex) \\[3pt]
+\textbf{end for} \\[5pt]
+\textbf{return} $U, \Sigma, V$
+\end{flushleft}
+
+\section{Comparison of Algorithms}
+
+\input{tables/table1.tex}
+
+\subsection{Reason for Choosing the Algorithm}
+
+Several algorithms can be used to compute the Singular Value Decomposition, such as 
+Full Eigen Decomposition, the Jacobi Eigenvalue Method, and iterative methods like Power Iteration. 
+Each method involves a trade-off between computational efficiency, accuracy, and implementation complexity.
+
+\begin{itemize}
+    \item \textbf{Full Eigen Decomposition} computes all eigenvalues and eigenvectors of 
+    $A^{T}A$ (or $A^{H}A$ in the complex case) using dense matrix operations. 
+    Although it provides an exact decomposition, its time complexity is $\mathcal{O}(n^3)$, 
+    making it impractical for large images or matrices.
+
+    \item \textbf{Jacobi Eigenvalue Method} iteratively zeroes out off-diagonal elements 
+    using orthogonal transformations. 
+    It achieves high accuracy but converges slowly and is computationally intensive for high-dimensional data. 
+    It is more suitable for educational demonstrations or very small matrices.
+
+    \item \textbf{Power Iteration with Deflation (Chosen)} is an iterative approach that 
+    efficiently extracts only the top-$k$ dominant singular values and corresponding vectors. 
+    It repeatedly multiplies the covariance matrix $B = A^{T}A$ with a random vector 
+    until convergence, then removes the found component via deflation. 
+    Its computational cost is approximately $\mathcal{O}(k n^2)$, 
+    which is much lower than the $\mathcal{O}(n^3)$ cost of full decomposition.
+\end{itemize}
+
+\noindent
+The Power Iteration with Deflation method was chosen because it provides a 
+balance between computational efficiency and accuracy. 
+It is especially effective for image compression tasks, where only a few 
+dominant singular values capture most of the visual information. 
+Moreover, its iterative nature makes it memory-efficient and suitable 
+for both real and complex matrices.
+
+\section{Reconstructed Images}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.32\columnwidth]{figs/greyscale.png}
+\includegraphics[width=0.32\columnwidth]{figs/globe.jpg}
+\includegraphics[width=0.32\columnwidth]{figs/einstein.jpg}
+\caption{Original images used for SVD compression.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.32\columnwidth]{figs/output_k5.png}
+\includegraphics[width=0.32\columnwidth]{figs/out_k5.png}
+\includegraphics[width=0.32\columnwidth]{figs/ein_k5.png}
+\caption{Reconstructed images for $k = 5$.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.32\columnwidth]{figs/output_k20.png}
+\includegraphics[width=0.32\columnwidth]{figs/out_k20.png}
+\includegraphics[width=0.32\columnwidth]{figs/ein_k20.png}
+\caption{Reconstructed images for $k = 20$.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.32\columnwidth]{figs/output_k50.png}
+\includegraphics[width=0.32\columnwidth]{figs/out_k50.png}
+\includegraphics[width=0.32\columnwidth]{figs/ein_k50.png}
+\caption{Reconstructed images for $k = 50$.}
+\end{figure}
+
+
+\section{Error Analysis}
+
+\input{tables/table.tex}
+
+\section{Discussion and Reflections}
+
+\begin{itemize}
+    \item Increasing $k$ improves image quality but reduces compression efficiency.
+    \item The algorithm converged within 30--50 iterations per singular value.
+    \item Regular normalization ensured numerical stability and convergence.
+    \item Implementing the full method in C improved low-level understanding of SVD operations.
+\end{itemize}
+
+\end{document}

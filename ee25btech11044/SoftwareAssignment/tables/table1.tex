@@ -1,0 +1,11 @@
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{Algorithm} & \textbf{Description} & \textbf{Complexity} & \textbf{Accuracy} & \textbf{Suitability} \\ \hline
+Full Eigen Decomposition & Computes all eigenpairs of $A^TA$, $AA^T$ & $\mathcal{O}(n^3)$ & Exact & Slow for large images \\ \hline
+Jacobi Eigenvalue Method & Iteratively zeroes off-diagonal elements & $\mathcal{O}(n^3)$ & High & Educational, slow \\ \hline
+\textbf{Power Iteration (Used)} & Iteratively extracts top eigenvectors via deflation & $\mathcal{O}(k n^2)$ & Approximate & \textbf{Fast and practical} \\ \hline
+\end{tabular}
+\caption{Comparison of SVD computation methods.}
+\end{table}

@@ -1,0 +1,13 @@
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+\textbf{Rank (k)} & \textbf{Frobenius Error} & \textbf{Comment} \\ \hline
+5   & 4713.590 & Large error, coarse approximation \\ \hline
+20  & 2126.570 & Balanced quality vs compression \\ \hline
+50  & 880.529  & Near-original reconstruction \\ \hline
+100 & 164.920  & Very high quality, visually identical to original \\ \hline
+\end{tabular}
+\caption{Frobenius norm error for different truncation ranks $k$. 
+As $k$ increases, the reconstruction quality improves significantly, approaching the original image for $k = 100$.}
+\end{table}
